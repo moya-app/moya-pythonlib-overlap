@@ -42,4 +42,4 @@ class HTTPClientHelper(ClientHelperBase):
         response.raise_for_status()
 
         # Here is the vector of decryptions of the answer
-        return [ts.bfv_vector(public_context, b64decode(ct)) for ct in response.json()]
+        return [ts.bfv_vector_from(public_context, b64decode(ct)) for ct in response.json()]

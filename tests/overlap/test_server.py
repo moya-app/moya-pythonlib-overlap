@@ -3,12 +3,12 @@ import json
 import os.path
 import typing as t
 
-from tenseal import BFVVector, Context
+import tenseal as ts
 
 from moya.overlap.client import Client, ClientHelperBase
 from moya.overlap.parameters import parameters
 from moya.overlap.server import Server
-from moya.overlap.types import OPRFPoints, VectorMatrix
+from moya.overlap.types import BFVVector, OPRFPoints, VectorMatrix
 
 
 # Recurse through a data structure and convert tuples to lists
@@ -44,8 +44,24 @@ async def test_client_server(regenerate: bool) -> None:
         async def oprf(self, encoded_client_set: OPRFPoints) -> OPRFPoints:
             return server.oprf(encoded_client_set)
 
-        async def run_query(self, public_context: Context, enc_query: VectorMatrix) -> list[BFVVector]:
-            return server.run_overlap_query(server_points, enc_query)
+        async def run_query(self, public_context: ts.Context, enc_query: VectorMatrix) -> list[BFVVector]:
+            # Just test directly
+            # return server.run_overlap_query(server_points, enc_query)
+
+            # Test serialization with same steps as httpx client library for wire transmission
+
+            # Encode
+            srv_context = ts.context_from(public_context.serialize())
+            ser_query = [[None if v is None else v.serialize() for v in c] for c in enc_query]
+
+            # Decode
+            query_vectors: VectorMatrix = [[None if cell is None else ts.bfv_vector_from(srv_context, cell) for cell in row] for row in ser_query]
+
+            # Run
+            results = [x.serialize() for x in server.run_overlap_query(server_points, query_vectors)]
+
+            # Recover client-side
+            return [ts.bfv_vector_from(public_context, ct) for ct in results]
 
     test_client_points = [
         450258435097,
