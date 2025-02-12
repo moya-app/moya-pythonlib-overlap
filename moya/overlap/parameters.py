@@ -58,6 +58,3 @@ class Parameters(BaseModel):
     @cached_property
     def logB_ell(self) -> int:
         return int(log2(self.minibin_capacity) / self.ell) + 1  # <= 2 ** HE.depth
-
-
-parameters = Parameters()

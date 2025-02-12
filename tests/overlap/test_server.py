@@ -6,7 +6,7 @@ import typing as t
 import tenseal as ts
 
 from moya.overlap.client import Client, ClientHelperBase
-from moya.overlap.parameters import parameters
+from moya.overlap.parameters import Parameters
 from moya.overlap.server import Server
 from moya.overlap.types import BFVVector, OPRFPoints, VectorMatrix
 
@@ -35,6 +35,8 @@ async def test_client_server(regenerate: bool) -> None:
         542438948507207,
         3259695623874827,
     ]
+    # TODO: Use smaller parameter settings for testing to speed stuff up and shrink size of test data?
+    parameters = Parameters()
     server = Server(parameters, 1234567891011121314151617181920)
     server_points = server.preprocess_transposed(test_server_points)
     expected = load_file(regenerate, "server_preprocessed.expected.gz", server_points, fn=gzip.open)
