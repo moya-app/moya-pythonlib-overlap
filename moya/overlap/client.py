@@ -6,7 +6,7 @@ import tenseal as ts
 from .cuckoo_hash import Cuckoo
 from .oprf import OPRF
 from .parameters import Parameters
-from .types import OPRFPoints, RawNumbers, VectorMatrix
+from .types import BFVVector, OPRFPoints, RawNumbers, VectorMatrix
 
 
 class ClientHelperBase(ABC):
@@ -22,7 +22,7 @@ class ClientHelperBase(ABC):
         pass
 
     @abstractmethod
-    async def run_query(self, public_context: ts.Context, enc_query: VectorMatrix) -> list[bytes]:
+    async def run_query(self, public_context: ts.Context, enc_query: VectorMatrix) -> list[BFVVector]:
         """
         Run the given query against the server
         """
@@ -87,10 +87,11 @@ class Client:
                 if (i + 1) * self.parameters.base**j - 1 < self.parameters.minibin_capacity:
                     for k in range(len(windowed_items)):
                         plain_query[k] = windowed_items[k][i][j]
-                    enc_query[i][j] = ts.bfv_vector(self.private_context, plain_query)
+                    enc_query[i][j] = ts.bfv_vector(self.public_context, plain_query)
 
-        ciphertexts = await self.helper.run_query(self.public_context, enc_query)
-        decryptions = [ts.bfv_vector_from(self.private_context, ct).decrypt() for ct in ciphertexts]
+        result = await self.helper.run_query(self.public_context, enc_query)
+        secret_key = self.private_context.secret_key()
+        decryptions = [r.decrypt(secret_key) for r in result]
 
         recover_CH_structure = [m[0][0] for m in windowed_items]
 

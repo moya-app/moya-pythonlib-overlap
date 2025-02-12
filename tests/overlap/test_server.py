@@ -3,7 +3,7 @@ import json
 import os.path
 import typing as t
 
-from tenseal import Context
+from tenseal import BFVVector, Context
 
 from moya.overlap.client import Client, ClientHelperBase
 from moya.overlap.parameters import parameters
@@ -44,8 +44,8 @@ async def test_client_server(regenerate: bool) -> None:
         async def oprf(self, encoded_client_set: OPRFPoints) -> OPRFPoints:
             return server.oprf(encoded_client_set)
 
-        async def run_query(self, public_context: Context, enc_query: VectorMatrix) -> list[bytes]:
-            return server.run_overlap_query(server_points, public_context, enc_query)
+        async def run_query(self, public_context: Context, enc_query: VectorMatrix) -> list[BFVVector]:
+            return server.run_overlap_query(server_points, enc_query)
 
     test_client_points = [
         450258435097,

@@ -1,7 +1,7 @@
 import typing as t
 
 import numpy as np
-from tenseal import BFVVector, Context
+from tenseal import BFVVector
 
 from .oprf import OPRF, OPRFPoints
 from .parameters import Parameters
@@ -121,7 +121,7 @@ class Server:
             j = j + 1
         return low_depth_multiplication(necessary_powers)
 
-    def run_overlap_query(self, transposed_poly_coeffs: IntMatrix, srv_context: Context, received_enc_query: VectorMatrix) -> list[bytes]:
+    def run_overlap_query(self, transposed_poly_coeffs: IntMatrix, received_enc_query: VectorMatrix) -> list[BFVVector]:
         """
         Realtime run the overlap query to return results to client
         """
@@ -140,12 +140,12 @@ class Server:
 
         # Server sends alpha ciphertexts, obtained from performing dot_product between the polynomial coefficients from the
         # preprocessed server database and all the powers Enc(y), ..., Enc(y^{minibin_capacity})
-        srv_answer: list[bytes] = []
+        srv_answer: list[BFVVector] = []
         for i in range(self.parameters.alpha):
             # the rows with index multiple of (B/alpha+1) have only 1's
-            dot_product = all_powers[0]
+            dot_product = all_powers[0].copy()
             for j in range(1, self.parameters.minibin_capacity):
                 dot_product += transposed_poly_coeffs[(self.parameters.minibin_capacity + 1) * i + j] * all_powers[j]
             dot_product += transposed_poly_coeffs[(self.parameters.minibin_capacity + 1) * i + self.parameters.minibin_capacity]
-            srv_answer.append(dot_product.serialize())
+            srv_answer.append(dot_product)
         return srv_answer

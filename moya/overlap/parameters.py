@@ -40,7 +40,7 @@ class Parameters(BaseModel):
 
     @cached_property
     def sigma_max(self) -> int:
-        "length of the database items"
+        "max length in bits of the numbers that are used for comparison"
         return int(log2(self.plain_modulus)) + self.output_bits - (int(log2(self.number_of_hashes)) + 1)
 
     @cached_property
