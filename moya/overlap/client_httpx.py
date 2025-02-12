@@ -2,11 +2,11 @@ import typing as t
 from base64 import b64decode, b64encode
 
 import httpx
-from tenseal import BFVVector, Context
+import tenseal as ts
 
 from .client import Client, ClientHelperBase
 from .parameters import Parameters
-from .types import OPRFPoints, VectorMatrix
+from .types import BFVVector, OPRFPoints, VectorMatrix
 
 
 class HTTPClientHelper(ClientHelperBase):
@@ -31,7 +31,7 @@ class HTTPClientHelper(ClientHelperBase):
 
         return t.cast(OPRFPoints, [tuple(p) for p in response.json()["points"]])
 
-    async def run_query(self, public_context: Context, enc_query: VectorMatrix) -> list[BFVVector]:
+    async def run_query(self, public_context: ts.Context, enc_query: VectorMatrix) -> list[BFVVector]:
         response = await self.http_client.post(
             "query",
             json={
@@ -42,4 +42,4 @@ class HTTPClientHelper(ClientHelperBase):
         response.raise_for_status()
 
         # Here is the vector of decryptions of the answer
-        return [BFVVector.lazy_load(b64decode(ct)) for ct in response.json()]
+        return [ts.bfv_vector(public_context, b64decode(ct)) for ct in response.json()]
