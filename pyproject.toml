@@ -1,0 +1,102 @@
+[project]
+name = "moya-pythonlib-overlap"
+version = "0.1.0"
+description = "Moya Python Overlap (Private Set Intersection) Library"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [
+    { name = "Mark Zealey", email = "mark.zealey@moya.app" }
+]
+maintainers = [
+    { name = "Mark Zealey", email = "mark.zealey@moya.app" }
+]
+
+dependencies = [
+    "fastecdsa==3.0.1",
+    "mmh3==5.1.0",
+    "numpy",
+    "tenseal==0.3.15",
+    "pydantic>=1.10.0,<3.0.0",
+    "httpx>=0.20.0",    # For the client, which we assume everyone would want to use
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff==0.9.4",
+    "mypy==1.14.1",
+    "poethepoet==0.22.0",
+    "pytest-asyncio==0.24.0",
+    "pytest-cov==4.1.0",
+    "pytest-subtests==0.11.0",
+    "pytest==8.2.1",
+    # "beartype==0.19.0",
+]
+
+[build-system]
+requires = ["setuptools >= 61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["moya.overlap"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 160
+
+[tool.ruff.lint]
+# See https://docs.astral.sh/ruff/rules/ for details
+select = [
+    "E",        # style stuff, whitespaces
+    "W",        # style stuff, whitespaces
+    "F",        # important pyflake lints
+    "I",        # import sorting
+    #"A",        # avoid overriding builtins
+    #"N",        # pep8 naming
+    "B018",     # useless expression
+    "RUF100",   # Unnecessary noqa
+    #"C",        # complexity
+]
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
+
+[tool.mypy]
+mypy_path = "stubs"
+plugins = [
+    "pydantic.mypy",
+]
+python_version = 3.12
+ignore_missing_imports = true
+disallow_any_generics = true   # Require list[int] instead of list
+namespace_packages = true      # For OpenTelemetry to work
+disallow_untyped_defs = true   # All functions should have type annotations
+warn_redundant_casts = true    # Casting a variable to its own type is disallowed
+strict_equality = true         # Error if both sides of a comparison are unequal
+strict_optional = true         # Require explicitly specifying None
+disallow_untyped_calls = true  # Don't allow calling untyped functions from typed ones
+warn_return_any = true         # Don't allow returning Any from a typed function
+disallow_any_unimported = true # Show warning when missing type hints cause an imported object to be Any
+warn_unreachable = true        # Warn on unreachable code
+enable_error_code = "redundant-expr" # Warn on redundant expressions
+
+[[tool.mypy.overrides]]
+module = ["tests.*"]
+# Allow some laziness in the tests
+disallow_untyped_defs = false
+disallow_any_generics = false
+
+[tool.poe.tasks]
+test = "pytest . --cov=moya --cov-report=term"
+"lint:ruff-check" = "ruff check"
+"lint:ruff-format" = "ruff format --diff"
+"lint:mypy"  = "mypy ."
+lint = ["lint:ruff-check", "lint:ruff-format", "lint:mypy"]
+"fix:ruff-check" = "ruff check --fix"
+"fix:ruff-format" = "ruff format"
+fix = ["fix:ruff-check", "fix:ruff-format"]
+
+[tool.pytest.ini_options]
+addopts = [ "--strict-markers" ]
+asyncio_mode = "auto"
+pythonpath = [ "." ]
+asyncio_default_fixture_loop_scope = "session"
