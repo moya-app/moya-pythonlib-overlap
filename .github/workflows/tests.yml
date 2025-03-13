@@ -30,6 +30,8 @@ jobs:
         name: Run lint
         run: |
           poe lint
+        env:
+          PIP_EXTRA_INDEX_URL: https://pypi.moya.app/moya/stable
       -
         name: Test with pytest
         # A 250 exit status sometimes randomly comes from the coverage report black magic
