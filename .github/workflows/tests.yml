@@ -10,8 +10,8 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.12"]
-        #builder: ["buildjet-2vcpu-ubuntu-2204", "buildjet-2vcpu-ubuntu-2204-arm"]
-        builder: ["buildjet-2vcpu-ubuntu-2204"]
+        builder: ["buildjet-2vcpu-ubuntu-2204", "buildjet-2vcpu-ubuntu-2204-arm"]
+#        builder: ["buildjet-2vcpu-ubuntu-2204"]
 
     runs-on: ${{ matrix.builder }}
     steps:
@@ -26,6 +26,8 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install -e ".[dev]"
+        env:
+          PIP_EXTRA_INDEX_URL: https://pypi.moya.app/moya/stable
       -
         name: Run lint
         run: |
