@@ -13,9 +13,9 @@ def rand_point(bound: int, i: int) -> int:
     :param i: an integer less than bound
     :return: a uniform integer from [0, bound - 1], distinct from i
     """
-    value = randint(0, bound - 1)
+    value = randint(0, bound - 1)  # nosec
     while value == i:
-        value = randint(0, bound - 1)
+        value = randint(0, bound - 1)  # nosec
     return value
 
 
@@ -24,7 +24,7 @@ class Cuckoo:
         self.number_of_bins = 2**parameters.output_bits
         self.recursion_depth = int(8 * math.log(self.number_of_bins) / math.log(2))
         self.data_structure: list[int | None] = [None for j in range(self.number_of_bins)]
-        self.insert_index = randint(0, parameters.number_of_hashes - 1)
+        self.insert_index = randint(0, parameters.number_of_hashes - 1)  # nosec
         self.depth = 0
 
         self.parameters = parameters
@@ -75,7 +75,7 @@ class Cuckoo:
         self.data_structure[current_location] = self.left_and_index(item, self.insert_index)
 
         if current_item is None:
-            self.insert_index = randint(0, self.parameters.number_of_hashes - 1)
+            self.insert_index = randint(0, self.parameters.number_of_hashes - 1)  # nosec
             self.depth = 0
         else:
             unwanted_index = self.extract_index(current_item)

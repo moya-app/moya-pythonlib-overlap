@@ -43,7 +43,7 @@ class Client:
 
         # Generate a random key if none is provided. Not cryptographically secure, but good enough for our use-case
         # especially if it's continuously regenerated.
-        self.key = oprf_client_key if oprf_client_key is not None else random.randrange(self._oprf.order_of_generator)
+        self.key = oprf_client_key if oprf_client_key is not None else random.randrange(self._oprf.order_of_generator)  # nosec
 
         # Setting the public and private contexts for the BFV Homorphic Encryption scheme
         self.private_context = ts.context(
